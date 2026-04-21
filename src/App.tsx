@@ -18,7 +18,8 @@ import {
   MessageCircle,
   XCircle,
   CheckCircle,
-  MapPin
+  MapPin,
+  User
 } from 'lucide-react';
 import logoImg from './assets/logo.png';
 import logoWhiteImg from './assets/logo-white.png';
@@ -85,37 +86,41 @@ function LeadForm({ variant = 'hero' }) {
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
       <div>
-        <label className={labelClasses}>Seu nome</label>
-        <input 
-          type="text" 
-          required
-          value={nome}
-          onChange={(e) => setNome(e.target.value)}
-          placeholder="Dr. Rafael Mendonça" 
-          className={inputClasses} 
-        />
+        <div className="relative group">
+          <User className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-300 ${variant === 'hero' ? 'text-brand-accent/40 group-focus-within:text-brand-accent' : 'text-neutral-medium/40 group-focus-within:text-brand-900'}`} />
+          <input 
+            type="text" 
+            required
+            value={nome}
+            onChange={(e) => setNome(e.target.value)}
+            placeholder="Seu Nome" 
+            className={`${inputClasses} pl-12`} 
+          />
+        </div>
       </div>
       <div>
-        <label className={labelClasses}>WhatsApp</label>
-        <input 
-          type="tel" 
-          required
-          value={whatsapp}
-          onChange={(e) => setWhatsapp(e.target.value)}
-          placeholder="(17) 99999-0000" 
-          className={inputClasses} 
-        />
+        <div className="relative group">
+          <Phone className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-300 ${variant === 'hero' ? 'text-brand-accent/40 group-focus-within:text-brand-accent' : 'text-neutral-medium/40 group-focus-within:text-brand-900'}`} />
+          <input 
+            type="tel" 
+            required
+            value={whatsapp}
+            onChange={(e) => setWhatsapp(e.target.value)}
+            placeholder="Seu WhatsApp" 
+            className={`${inputClasses} pl-12`} 
+          />
+        </div>
       </div>
       <div className="pt-3">
         <button 
           disabled={status === 'loading'}
-          className="w-full btn-primary py-[22px] rounded-xl font-bold tracking-wide flex items-center justify-center gap-2 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          className="w-full btn-primary py-[24px] px-2 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all whitespace-nowrap text-[15.3px]"
         >
           {status === 'loading' ? 'ENVIANDO...' : 'QUERO ORGANIZAR O FINANCEIRO'}
         </button>
       </div>
       <p className={`text-[10px] text-center uppercase tracking-[0.2em] mt-4 ${variant === 'hero' ? 'text-white/40' : 'text-neutral-medium/60 border-t border-neutral-light pt-4'}`}>
-        Atendemos escritórios em todo o Brasil
+        Atendemos advogados de todo o Brasil
       </p>
     </form>
   );
@@ -124,7 +129,7 @@ function LeadForm({ variant = 'hero' }) {
 function Navbar() {
   return (
     <nav className="border-b border-neutral-light bg-white sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-center md:justify-between">
         <div className="flex items-center">
           <img src={logoImg} alt="WeSimp" className="h-12 w-auto" />
         </div>
@@ -154,40 +159,24 @@ function Hero() {
         <div className="absolute top-1/2 -left-24 w-64 h-64 rounded-full border-[20px] border-white/20"></div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-20 lg:py-28 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
-          <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-5 px-7 py-5 rounded-3xl bg-white shadow-[0_20px_50px_rgba(0,0,0,0.15)] mb-12 border border-brand-accent/20 relative group overflow-hidden">
-              <div className="absolute top-0 left-0 w-2 h-full bg-brand-accent"></div>
-              <div className="bg-brand-accent/10 p-3 rounded-2xl border border-brand-accent/20 shadow-inner">
-                <BarChart3 className="w-7 h-7 text-brand-900" />
-              </div>
-              <div className="flex flex-col">
-                <div className="text-lg sm:text-xl leading-tight">
-                  <span className="text-neutral-medium font-medium block">Gestão Financeira para</span>
-                  <span className="text-brand-900 font-black tracking-tight">Escritórios de Advocacia</span>
-                </div>
-              </div>
+          <div className="max-w-2xl flex flex-col items-center lg:items-start text-center lg:text-left">
+            <div className="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-brand-accent/10 border border-brand-accent/30 mb-8 backdrop-blur-sm transition-all hover:bg-brand-accent/20">
+              <span className="text-[13.2px] font-bold text-brand-accent uppercase tracking-[0.25em] leading-tight text-center">
+                BPO Financeiro <br className="sm:hidden" /> para Advogados
+              </span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight leading-[1.15] mb-6">
-              Você cuida dos clientes e dos processos. <span className="text-brand-accent">A WeSimp cuida do financeiro.</span>
+            <h1 className="text-[2.025rem] md:text-5xl font-bold tracking-tight leading-[1.15] mb-6">
+              Advogado bom não perde tempo com financeiro. <span className="text-brand-accent">Deixa isso com a gente.</span>
             </h1>
-            <p className="text-lg text-neutral-light mb-8 leading-relaxed max-w-[540px] opacity-90">
-              Seu escritório precisa crescer: mais clientes, mais contratos. Não é possível crescer perdendo tempo com extratos, cobranças e contas a pagar. Nós resolvemos isso por você.
+            <p className="text-[1.0125rem] text-neutral-light mb-8 leading-relaxed max-w-[540px] opacity-90 mx-auto lg:mx-0">
+              A WeSimp organiza o financeiro do seu escritório - contas a pagar, cobranças, fluxo de caixa - para você focar no que realmente importa: seus clientes e processos.
             </p>
           </div>
 
-          <div id="diagnostico" className="bg-white/10 backdrop-blur-2xl rounded-3xl p-10 shadow-[0_40px_80px_rgba(0,0,0,0.5)] lg:ml-auto w-full max-w-md border border-white/10 relative overflow-hidden group">
+          <div id="diagnostico" className="bg-white/10 backdrop-blur-2xl rounded-3xl p-6 lg:p-10 shadow-[0_40px_80px_rgba(0,0,0,0.5)] lg:ml-auto w-full max-w-md border border-white/10 relative overflow-hidden group -translate-y-[10%] lg:translate-y-0">
             <div className="absolute -top-24 -right-24 w-48 h-48 bg-brand-accent/20 rounded-full blur-3xl hover:bg-brand-accent/30"></div>
-            
-            <div className="text-center mb-10">
-              <h3 className="text-3xl font-bold mb-4 text-white leading-tight tracking-tighter">
-                Descubra como organizar o financeiro do seu escritório
-              </h3>
-              <p className="text-white/60 text-[17px] leading-relaxed max-w-[340px] mx-auto font-medium">
-                Vamos entender seu cenário e mostrar como podemos organizar tudo para você.
-              </p>
-            </div>
             
             <LeadForm variant="hero" />
           </div>
@@ -201,12 +190,12 @@ function Features() {
   const features = [
     {
       title: "Contas a Pagar & Receber",
-      desc: "Controle completo das entradas e saídas, com vencimentos monitorados e pagamentos programados, sem atrasos.",
+      desc: "Vencimentos monitorados e pagamentos programados, sem atrasos e sem esquecimentos.",
       icon: <CircleDollarSign strokeWidth={1.5} className="w-8 h-8 text-brand-accent" />
     },
     {
       title: "Conciliação Bancária",
-      desc: "Todos os lançamentos conferidos com os extratos bancários, garantindo números corretos e sem divergências.",
+      desc: "Todos os lançamentos conferidos com os extratos bancários — números corretos e sem divergências.",
       icon: <Landmark strokeWidth={1.5} className="w-8 h-8 text-brand-accent" />
     },
     {
@@ -221,23 +210,29 @@ function Features() {
     },
     {
       title: "Dashboard & Relatórios",
-      desc: "Indicadores atualizados em tempo real e relatórios mensais com análise do financeiro.",
+      desc: "Indicadores em tempo real e relatórios mensais com análise completa do seu financeiro.",
       icon: <BarChart3 strokeWidth={1.5} className="w-8 h-8 text-brand-accent" />
     },
     {
       title: "Atendimento via WhatsApp",
-      desc: "Contato direto com o time da WeSimp, com suporte personalizado.",
+      desc: "Contato direto com o time WeSimp. Suporte personalizado, sem fila, sem robô.",
       icon: <MessageCircle strokeWidth={1.5} className="w-8 h-8 text-brand-accent" />
     }
   ];
 
   return (
-    <section id="servicos" className="py-32 bg-white border-y border-neutral-light">
+    <section id="servicos" className="py-12 lg:py-32 bg-white border-y border-neutral-light">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-20 max-w-3xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-brand-900 leading-tight tracking-tight">
-            O BPO Financeiro da WeSimp é a solução ideal para organizar o seu escritório
+        <div className="text-center mb-12 lg:mb-20 max-w-4xl mx-auto">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-brand-accent/10 text-brand-accent text-[11px] font-bold uppercase tracking-[0.2em] mb-4">
+            O que fazemos
+          </span>
+          <h2 className="text-3xl md:text-4xl font-bold text-brand-900 leading-tight tracking-tight mb-6">
+            Tudo que o seu financeiro precisa, em um único serviço.
           </h2>
+          <p className="text-xl text-neutral-medium leading-relaxed max-w-3xl mx-auto">
+            Reunimos contadores, uma plataforma própria e um analista dedicado - para que você tenha clareza total sobre os números do seu escritório.
+          </p>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -255,10 +250,10 @@ function Features() {
         </div>
 
         <div className="mt-16 flex flex-col items-center justify-center">
-          <a href="#contato" className="w-full sm:w-auto btn-primary px-12 py-5 rounded-xl font-black flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-all">
+          <a href="#contato" className="w-full sm:w-auto btn-primary px-12 py-5 rounded-xl font-black flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-all whitespace-nowrap text-[17.2px]">
             QUERO ORGANIZAR O FINANCEIRO
           </a>
-          <p className="text-[10px] text-center text-neutral-medium/60 mt-4 uppercase tracking-[0.2em] font-bold">Atendemos escritórios em todo o Brasil</p>
+          <p className="text-[10px] text-center text-neutral-medium/60 mt-4 uppercase tracking-[0.2em] font-bold">Atendemos advogados de todo o Brasil</p>
         </div>
 
       </div>
@@ -281,7 +276,7 @@ function TargetAudience() {
   const lastPoint = "Focar 100% na advocacia, sem se envolver no operacional financeiro";
 
   return (
-    <section id="publico" className="py-32 bg-neutral-light/30 border-t border-neutral-light/50 overflow-hidden">
+    <section id="publico" className="py-20 lg:py-32 bg-neutral-light/30 border-t border-neutral-light/50 overflow-hidden">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-20">
           <h4 className="text-brand-accent font-bold tracking-widest uppercase text-xs mb-6">PARA QUEM É INDICADO</h4>
@@ -329,7 +324,7 @@ function TargetAudience() {
 
 function BottomCTA() {
   return (
-    <section id="contato" className="py-32 bg-brand-900 text-white relative overflow-hidden">
+    <section id="contato" className="py-20 lg:py-32 bg-brand-900 text-white relative overflow-hidden">
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-0 right-0 w-[800px] h-[800px] rounded-full border-[60px] border-white/20 translate-x-1/3 -translate-y-1/3"></div>
       </div>
@@ -340,11 +335,14 @@ function BottomCTA() {
           {/* LADO ESQUERDO: TEXTO E SOCIAL PROOF */}
           <div className="flex flex-col justify-center">
             <div className="mb-10 lg:mb-12">
+              <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-brand-accent text-[11px] font-bold uppercase tracking-[0.2em] mb-6">
+                Fale com a WeSimp
+              </span>
               <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight leading-tight">
-                Pronto para simplificar o seu financeiro?
+                Pronto para simplificar o financeiro do seu escritório?
               </h2>
               <p className="text-xl text-white/70 leading-relaxed max-w-[440px]">
-                Preencha o formulário e nossa equipe entrará em contato para analisar sua rotina, tirar suas dúvidas e apresentar uma proposta personalizada para o seu escritório.
+                Preencha o formulário e nossa equipe entra em contato para entender sua rotina e apresentar uma proposta personalizada.
               </p>
             </div>
 
@@ -476,18 +474,18 @@ function WhyWeSimp() {
   ];
 
   return (
-    <section id="solucao" className="py-32 bg-white overflow-hidden border-b border-neutral-light">
+    <section id="solucao" className="py-12 lg:py-32 bg-white overflow-hidden border-b border-neutral-light">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-16 items-start">
           {/* LADO ESQUERDO: TEXTO */}
           <div className="space-y-8">
             <h2 className="text-3xl md:text-4xl font-bold text-brand-900 leading-tight tracking-tight">
-              Por que a gestão financeira da WeSimp é ideal para a advocacia?
+              Por que o BPO Financeiro da WeSimp é ideal para o seu escritório?
             </h2>
             
             <div className="space-y-6">
               <p className="text-[17px] text-neutral-medium leading-relaxed">
-                <strong>Escritórios de advocacia têm uma dinâmica diferente:</strong>
+                O motivo é simples. Escritórios de advocacia tem uma dinâmica diferente.
               </p>
               <ul className="space-y-3">
                 {painPoints.map((point, i) => (
@@ -498,12 +496,12 @@ function WhyWeSimp() {
                 ))}
               </ul>
               <p className="text-[17px] text-neutral-medium leading-relaxed font-bold border-l-4 border-brand-accent/30 pl-4 py-1">
-                Um BPO Financeiro genérico não resolve isso.
+                Um BPO genérico não resolve isso.
               </p>
             </div>
 
             <p className="text-lg text-neutral-medium leading-relaxed mb-6">
-              Na WeSimp, reunimos uma <strong>equipe de contadores</strong>, uma <strong>plataforma de gestão financeira própria</strong> e um <strong>analista dedicado</strong> ao seu escritório.
+              Na WeSimp, reunimos uma equipe de contadores, uma plataforma de gestão e um analista dedicado ao seu escritório.
             </p>
           </div>
           
@@ -524,20 +522,20 @@ function WhyWeSimp() {
 
             <div className="bg-brand-accent/5 border-l-4 border-brand-accent p-8 rounded-r-2xl shadow-sm">
               <p className="text-brand-900 text-lg mb-4 leading-relaxed">
-                <strong>O resultado:</strong> você <strong>para de perder tempo</strong> com o operacional financeiro e passa a ter <strong>clareza total</strong> sobre o que entra, o que sai e o que sobra. 
+                O resultado: você para de perder tempo com o operacional e passa a ter clareza total sobre os seus números.
               </p>
               <p className="font-bold text-brand-900 text-xl tracking-tight leading-tight">
-                Toda semana, todo mês, com dados reais na tela.
+                Toda semana, todo mês, dados reais na tela, em um clique.
               </p>
             </div>
           </div>
         </div>
 
         <div className="mt-16 flex flex-col items-center justify-center">
-          <a href="#contato" className="w-full sm:w-auto btn-primary px-12 py-5 rounded-xl font-black flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all">
+          <a href="#contato" className="w-full sm:w-auto btn-primary px-12 py-5 rounded-xl font-black flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all whitespace-nowrap text-[17.2px]">
             QUERO ORGANIZAR O FINANCEIRO
           </a>
-          <p className="text-[10px] text-center text-neutral-medium/60 mt-4 uppercase tracking-[0.2em] font-bold">Atendemos escritórios em todo o Brasil</p>
+          <p className="text-[10px] text-center text-neutral-medium/60 mt-4 uppercase tracking-[0.2em] font-bold">Atendemos advogados de todo o Brasil</p>
         </div>
 
       </div>
@@ -548,26 +546,29 @@ function WhyWeSimp() {
 function Comparison() {
   const withoutWeSimp = [
     "Mistura contas pessoais com o escritório",
-    "Perde tempo com cobranças e extratos",
-    "Não sabe exatamente quanto sobra no fim do mês",
-    "Inadimplência dos clientes só aumenta",
+    "Perde horas com cobranças e extratos",
+    "Não sabe exatamente quanto sobra",
+    "Inadimplência dos clientes aumenta",
     "Vive apagando incêndios financeiros"
   ];
 
   const withWeSimp = [
-    "Separação e organização completa do financeiro",
-    "Cobrança ativa e profissional dos clientes",
-    "Clareza total sobre entradas, saídas e lucro",
-    "Redução consistente da inadimplência",
+    "Separação e organização completa",
+    "Cobrança ativa e profissional",
+    "Clareza total sobre lucro real",
+    "Inadimplência reduzida consistentemente",
     "Rotina financeira organizada e previsível"
   ];
 
   return (
-    <section className="py-32 bg-neutral-light border-t border-neutral-light/50">
+    <section className="py-12 lg:py-32 bg-neutral-light border-t border-neutral-light/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-20">
-          <h2 className="text-3xl md:text-4xl font-bold text-brand-900 tracking-tight">
-            Hoje, seu financeiro está assim?
+        <div className="text-center mb-12 lg:mb-20">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-brand-accent/10 text-brand-accent text-[11px] font-bold uppercase tracking-[0.2em] mb-4">
+            Antes e depois
+          </span>
+          <h2 className="text-[33px] md:text-[39.6px] font-bold text-brand-900 tracking-tight">
+            Veja a diferença:
           </h2>
         </div>
 
@@ -580,7 +581,7 @@ function Comparison() {
               </div>
               <h3 className="text-xl font-bold text-neutral-dark">Sem o BPO da WeSimp</h3>
             </div>
-            <ul className="space-y-6">
+            <ul className="space-y-4">
               {withoutWeSimp.map((item, i) => (
                 <li key={i} className="flex items-start gap-4">
                   <div className="w-1.5 h-1.5 rounded-full bg-neutral-medium/30 mt-2.5 shrink-0"></div>
@@ -591,7 +592,7 @@ function Comparison() {
           </div>
 
           {/* COM WESIMP */}
-          <div className="bg-white rounded-3xl p-8 lg:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.08)] border border-brand-accent/20 relative overflow-hidden transform lg:scale-[1.02] hover:shadow-[0_30px_60px_rgba(0,0,0,0.12)] hover:-translate-y-1 transition-all duration-300 ease-out group">
+          <div className="bg-white rounded-3xl pt-16 pb-8 px-8 lg:pt-20 lg:pb-12 lg:px-12 shadow-[0_20px_50px_rgba(0,0,0,0.08)] border border-brand-accent/20 relative overflow-hidden transform lg:scale-[1.02] hover:shadow-[0_30px_60px_rgba(0,0,0,0.12)] hover:-translate-y-1 transition-all duration-300 ease-out group">
             <div className="absolute top-0 right-0 bg-brand-accent text-white px-6 py-2 text-[11px] font-bold uppercase tracking-widest rounded-bl-xl shadow-sm">
               Ideal para você
             </div>
@@ -601,7 +602,7 @@ function Comparison() {
               </div>
               <h3 className="text-xl font-bold text-brand-900">Com o BPO da WeSimp</h3>
             </div>
-            <ul className="space-y-6">
+            <ul className="space-y-4">
               {withWeSimp.map((item, i) => (
                 <li key={i} className="flex items-start gap-4">
                   <CheckCircle2 strokeWidth={1.5} className="w-5 h-5 text-brand-accent shrink-0 mt-0.5 opacity-80" />
@@ -613,10 +614,10 @@ function Comparison() {
         </div>
 
         <div className="mt-16 flex flex-col items-center justify-center">
-          <a href="#contato" className="w-full sm:w-auto btn-primary px-12 py-5 rounded-xl font-black flex items-center justify-center gap-2 shadow-[0_8px_20px_rgba(21,160,168,0.25)] hover:shadow-[0_12px_24px_rgba(21,160,168,0.35)] hover:-translate-y-0.5 transition-all">
+          <a href="#contato" className="w-full sm:w-auto btn-primary px-12 py-5 rounded-xl font-black flex items-center justify-center gap-2 shadow-[0_8px_20px_rgba(21,160,168,0.25)] hover:shadow-[0_12px_24px_rgba(21,160,168,0.35)] hover:-translate-y-0.5 transition-all whitespace-nowrap text-[17.2px]">
             QUERO ORGANIZAR O FINANCEIRO
           </a>
-          <p className="text-[10px] text-center text-neutral-medium/60 mt-4 uppercase tracking-[0.2em] font-bold">Atendemos escritórios em todo o Brasil</p>
+          <p className="text-[10px] text-center text-neutral-medium/60 mt-4 uppercase tracking-[0.2em] font-bold">Atendemos advogados de todo o Brasil</p>
         </div>
 
       </div>
