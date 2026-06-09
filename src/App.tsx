@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ArrowRight,
   CheckCircle2,
@@ -19,7 +19,12 @@ import {
   XCircle,
   CheckCircle,
   MapPin,
-  User
+  User,
+  X,
+  Search,
+  ArrowLeft,
+  RefreshCw,
+  Check
 } from 'lucide-react';
 import logoImg from './assets/logo.png';
 import logoWhiteImg from './assets/logo-white.png';
@@ -404,7 +409,7 @@ function BottomCTA() {
   );
 }
 
-function Footer() {
+function Footer({ onOpenAdmin }: { onOpenAdmin: () => void }) {
   return (
     <footer className="bg-brand-900 border-t border-white/10 pt-16 pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -437,7 +442,12 @@ function Footer() {
                 <span className="text-[14px]">Ambiente 100% Seguro</span>
               </div>
               <div className="flex items-center gap-3 text-white/70">
-                <Lock strokeWidth={1.5} className="w-5 h-5 text-brand-accent shrink-0" />
+                <Lock 
+                  strokeWidth={1.5} 
+                  className="w-5 h-5 text-brand-accent shrink-0 cursor-pointer hover:scale-105 transition-all" 
+                  onClick={onOpenAdmin}
+                  title="Dados Criptografados"
+                />
                 <span className="text-[14px]">Dados Criptografados</span>
               </div>
             </div>
@@ -655,7 +665,355 @@ function FloatingWhatsApp() {
   );
 }
 
+function LeadsCRM({ onClose }: { onClose: () => void }) {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [leads, setLeads] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  useEffect(() => {
+    const checkSession = async () => {
+      setLoading(true);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        setIsAuthenticated(true);
+        await fetchLeads();
+      }
+      setLoading(false);
+    };
+    checkSession();
+  }, []);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    try {
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (authError) throw authError;
+
+      setIsAuthenticated(true);
+      await fetchLeads();
+    } catch (err: any) {
+      console.error('Erro de autenticação:', err);
+      setError(err.message || 'Erro ao realizar login.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    setLoading(true);
+    await supabase.auth.signOut();
+    setIsAuthenticated(false);
+    setLeads([]);
+    setLoading(false);
+  };
+
+  const fetchLeads = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data, error: sbError } = await supabase
+        .from('leads')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (sbError) throw sbError;
+      setLeads(data || []);
+    } catch (err: any) {
+      console.error('Erro ao buscar leads:', err);
+      setError('Erro ao carregar leads do Supabase.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateLeadStatus = async (id: string, newStatus: string) => {
+    try {
+      // Optimistic update
+      setLeads(prev => prev.map(l => l.id === id ? { ...l, status: newStatus } : l));
+
+      const { error: updateError } = await supabase
+        .from('leads')
+        .update({ status: newStatus })
+        .eq('id', id);
+
+      if (updateError) throw updateError;
+    } catch (err) {
+      console.error('Erro ao atualizar status do lead:', err);
+      alert('Erro ao atualizar o status no Supabase. Tentando recarregar...');
+      fetchLeads();
+    }
+  };
+
+  const getWhatsAppLink = (phone: string) => {
+    const digits = phone.replace(/\D/g, '');
+    const formatted = (digits.startsWith('55') || digits.length < 10) ? digits : `55${digits}`;
+    return `https://wa.me/${formatted}`;
+  };
+
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (e) {
+      return dateString;
+    }
+  };
+
+  // Filter leads by search term
+  const filteredLeads = leads.filter(lead => {
+    const nameMatch = lead.nome?.toLowerCase().includes(searchTerm.toLowerCase());
+    const phoneMatch = lead.whatsapp?.includes(searchTerm);
+    return nameMatch || phoneMatch;
+  });
+
+  // Group leads by status
+  const newLeads = filteredLeads.filter(lead => !lead.status || lead.status === 'novo');
+  const contactedLeads = filteredLeads.filter(lead => lead.status === 'contatado');
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-brand-900 px-4">
+        <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl p-8 border border-neutral-light animate-in fade-in zoom-in-95 duration-200">
+          <div className="flex flex-col items-center mb-6">
+            <img src={logoImg} alt="WeSimp" className="h-12 w-auto mb-4" />
+            <h3 className="text-xl font-bold text-brand-900 tracking-tight">CRM - Acesso Restrito</h3>
+          </div>
+          
+          {error && (
+            <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm font-medium">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-neutral-medium uppercase tracking-wider mb-1">E-mail</label>
+              <input 
+                type="email" 
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border border-neutral-light bg-neutral-light/20 focus:bg-white focus:ring-[3px] focus:ring-brand-900/10 focus:border-brand-900 outline-none transition-all"
+                placeholder="admin@wesimp.com"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-neutral-medium uppercase tracking-wider mb-1">Senha</label>
+              <input 
+                type="password" 
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border border-neutral-light bg-neutral-light/20 focus:bg-white focus:ring-[3px] focus:ring-brand-900/10 focus:border-brand-900 outline-none transition-all"
+                placeholder="••••••••"
+              />
+            </div>
+            <button 
+              type="submit"
+              disabled={loading}
+              className="w-full btn-primary py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 mt-6 shadow-md transition-all text-white bg-brand-accent hover:bg-brand-accent/90 disabled:opacity-55"
+            >
+              {loading ? 'Entrando...' : 'Entrar'}
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-neutral-light flex flex-col font-sans text-text-primary">
+      {/* Top Navbar */}
+      <header className="bg-brand-900 text-white border-b border-white/10 px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-md">
+        <div className="flex items-center gap-4">
+          <img src={logoWhiteImg} alt="WeSimp" className="h-10 w-auto" />
+          <span className="h-6 w-px bg-white/20 hidden sm:inline"></span>
+          <h1 className="text-lg font-bold tracking-tight hidden sm:inline">CRM de Leads</h1>
+        </div>
+
+        {/* Search Input */}
+        <div className="relative w-full max-w-md">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50" />
+          <input 
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Buscar por nome ou telefone..."
+            className="w-full pl-10 pr-4 py-2 rounded-xl bg-white/10 border border-white/10 text-white placeholder:text-white/40 focus:bg-white focus:text-brand-900 focus:placeholder:text-neutral-medium/40 outline-none transition-all"
+          />
+        </div>
+
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={fetchLeads}
+            disabled={loading}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-white bg-white/10 hover:bg-white/20 border border-white/10 disabled:opacity-50 transition-all cursor-pointer"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            {loading ? 'Atualizando...' : 'Atualizar'}
+          </button>
+          <button 
+            onClick={handleLogout}
+            className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-red-600 hover:bg-red-700 transition-all cursor-pointer"
+          >
+            Sair
+          </button>
+        </div>
+      </header>
+
+      {/* Main Kanban Content */}
+      <main className="flex-1 p-6 md:p-8 overflow-y-auto">
+        <div className="grid md:grid-cols-2 gap-6 max-w-7xl mx-auto items-start h-full">
+          
+          {/* Column 1: Novos Leads */}
+          <div className="bg-white/80 backdrop-blur-sm rounded-3xl border border-neutral-light shadow-sm p-6 flex flex-col max-h-[80vh]">
+            <div className="flex items-center justify-between pb-4 border-b border-neutral-light mb-4">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+                <h2 className="text-base font-bold text-brand-900 uppercase tracking-wider">Novos Leads</h2>
+              </div>
+              <span className="px-2.5 py-1 text-xs font-black bg-amber-500/10 text-amber-600 rounded-full">
+                {newLeads.length}
+              </span>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-4 max-h-[60vh] pr-1">
+              {newLeads.length === 0 ? (
+                <div className="text-center py-12 text-neutral-medium/60 text-sm">
+                  Nenhum lead nesta coluna.
+                </div>
+              ) : (
+                newLeads.map(lead => (
+                  <div key={lead.id} className="p-5 rounded-2xl bg-white border border-neutral-light shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-md transition-all group relative">
+                    <div className="mb-3">
+                      <h3 className="font-bold text-[16px] text-brand-900 group-hover:text-brand-accent transition-colors mb-0.5">{lead.nome}</h3>
+                      <p className="text-[11px] text-neutral-medium font-semibold">{formatDate(lead.created_at)}</p>
+                    </div>
+                    
+                    <div className="mb-4 font-mono text-xs text-neutral-dark flex items-center gap-1.5">
+                      <Phone className="w-3.5 h-3.5 text-neutral-medium" />
+                      {lead.whatsapp}
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <a 
+                        href={getWhatsAppLink(lead.whatsapp)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-white bg-green-600 hover:bg-green-700 transition-colors shadow-sm"
+                      >
+                        <Phone className="w-3.5 h-3.5" />
+                        WhatsApp
+                      </a>
+                      <button 
+                        onClick={() => updateLeadStatus(lead.id, 'contatado')}
+                        className="flex items-center justify-center gap-1 px-3 py-2 rounded-xl text-xs font-bold text-brand-accent bg-brand-accent/10 border border-brand-accent/20 hover:bg-brand-accent hover:text-white transition-all cursor-pointer"
+                        title="Marcar como Contato Realizado"
+                      >
+                        Atendido
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Column 2: Contato Realizado */}
+          <div className="bg-white/80 backdrop-blur-sm rounded-3xl border border-neutral-light shadow-sm p-6 flex flex-col max-h-[80vh]">
+            <div className="flex items-center justify-between pb-4 border-b border-neutral-light mb-4">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                <h2 className="text-base font-bold text-brand-900 uppercase tracking-wider">Contato Realizado</h2>
+              </div>
+              <span className="px-2.5 py-1 text-xs font-black bg-emerald-500/10 text-emerald-600 rounded-full">
+                {contactedLeads.length}
+              </span>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-4 max-h-[60vh] pr-1">
+              {contactedLeads.length === 0 ? (
+                <div className="text-center py-12 text-neutral-medium/60 text-sm">
+                  Nenhum lead nesta coluna.
+                </div>
+              ) : (
+                contactedLeads.map(lead => (
+                  <div key={lead.id} className="p-5 rounded-2xl bg-white border border-neutral-light shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-md transition-all group relative">
+                    <div className="mb-3">
+                      <h3 className="font-bold text-[16px] text-brand-900 group-hover:text-brand-accent transition-colors mb-0.5">{lead.nome}</h3>
+                      <p className="text-[11px] text-neutral-medium font-semibold">{formatDate(lead.created_at)}</p>
+                    </div>
+                    
+                    <div className="mb-4 font-mono text-xs text-neutral-dark flex items-center gap-1.5">
+                      <Phone className="w-3.5 h-3.5 text-neutral-medium" />
+                      {lead.whatsapp}
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <a 
+                        href={getWhatsAppLink(lead.whatsapp)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-white bg-green-600 hover:bg-green-700 transition-colors shadow-sm"
+                      >
+                        <Phone className="w-3.5 h-3.5" />
+                        WhatsApp
+                      </a>
+                      <button 
+                        onClick={() => updateLeadStatus(lead.id, 'novo')}
+                        className="flex items-center justify-center gap-1 px-3 py-2 rounded-xl text-xs font-bold text-neutral-medium bg-neutral-light hover:bg-neutral-light/80 border border-neutral-light transition-all cursor-pointer"
+                        title="Retornar para Novos Leads"
+                      >
+                        <ArrowLeft className="w-3.5 h-3.5" />
+                        Retornar
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+        </div>
+      </main>
+    </div>
+  );
+}
+
 export default function App() {
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('admin') === 'true') {
+      setIsAdmin(true);
+    }
+  }, []);
+
+  if (isAdmin) {
+    return <LeadsCRM onClose={() => {
+      window.location.search = '';
+    }} />;
+  }
+
   return (
     <div className="min-h-screen bg-neutral-light font-sans text-text-primary">
       <Navbar />
@@ -665,7 +1023,9 @@ export default function App() {
       <Features />
       <TargetAudience />
       <BottomCTA />
-      <Footer />
+      <Footer onOpenAdmin={() => {
+        window.open(window.location.origin + '?admin=true', '_blank');
+      }} />
       <FloatingWhatsApp />
     </div>
   );
