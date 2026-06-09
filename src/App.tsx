@@ -26,8 +26,22 @@ import logoWhiteImg from './assets/logo-white.png';
 import whyWesimpImg from './assets/why-wesimp.jpeg';
 import luizMoraesImg from './assets/luiz-moraes.jpeg';
 import whatsappImg from './assets/whatsapp.svg';
+import { supabase } from './lib/supabaseClient';
 
-const GOOGLE_SHEETS_URL = 'SUA_URL_AQUI'; // Substitua pela URL da sua implantação do Apps Script
+const formatWhatsApp = (value: string) => {
+  const digits = value.replace(/\D/g, '');
+  const limited = digits.slice(0, 11);
+  if (limited.length <= 2) {
+    return limited.length > 0 ? `(${limited}` : '';
+  }
+  if (limited.length <= 6) {
+    return `(${limited.slice(0, 2)}) ${limited.slice(2)}`;
+  }
+  if (limited.length <= 10) {
+    return `(${limited.slice(0, 2)}) ${limited.slice(2, 6)}-${limited.slice(6)}`;
+  }
+  return `(${limited.slice(0, 2)}) ${limited.slice(2, 7)}-${limited.slice(7)}`;
+};
 
 function LeadForm({ variant = 'hero' }) {
   const [nome, setNome] = useState('');
@@ -41,22 +55,23 @@ function LeadForm({ variant = 'hero' }) {
     setStatus('loading');
     
     try {
-      await fetch(GOOGLE_SHEETS_URL, {
-        method: 'POST',
-        mode: 'no-cors', // Importante para o Apps Script
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ nome, whatsapp }),
-      });
+      const { error } = await supabase
+        .from('leads')
+        .insert([{ nome, whatsapp }]);
+
+      if (error) throw error;
       
       setStatus('success');
       setNome('');
       setWhatsapp('');
     } catch (error) {
-      console.error('Erro ao enviar lead:', error);
+      console.error('Erro ao enviar lead para o Supabase:', error);
       setStatus('error');
     }
+  };
+
+  const handleWhatsappChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setWhatsapp(formatWhatsApp(e.target.value));
   };
 
   const inputClasses = variant === 'hero' 
@@ -105,7 +120,7 @@ function LeadForm({ variant = 'hero' }) {
             type="tel" 
             required
             value={whatsapp}
-            onChange={(e) => setWhatsapp(e.target.value)}
+            onChange={handleWhatsappChange}
             placeholder="Seu WhatsApp" 
             className={`${inputClasses} pl-12`} 
           />
